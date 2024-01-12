@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library App</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+      }
+      #ui-container {
+        display: flex;
+        width: auto;
+        border: 6px solid red;
+        padding: 10px;
+        background-color: yellow;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      #form-new-book-button-container {
+        width: 300px;
+        border: 4px solid red;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+      }
+
+      label {
+        margin-top: 20px;
+      }
+
+      /*
+      #form-container {
+        display: flex;
+        align-items: center;
+        width: 300px;
+        height: 375px;
+       background-color: red;
+       padding: 5px;
+      }
+*/
+
+      #form-elements-container {
+        display: flex;
+        flex-direction: column;
+        margin-left: 10px;
+        width: 250px;
+        border: 3px solid;
+        padding: 10px;
+        gap: 5px;
+        font-weight: bold;
+        background-color: rgba(0, 255, 255, 0.9);
+      }
+
+      #caption-container {
+        display: flex;
+        justify-content: center;
+        font-size: 20px;
+        color: red;
+      }
+
+      #submit-button-container {
+        width: 300px;
+        display: flex;
+        justify-content: center;
+      }
+
+      #submit-button {
+        background-color: lightblue;
+      }
+
+      #new-book-button {
+        margin: 10px;
+        border-radius: 50px;
+        background-color: lightpink;
+      }
+
+      #display-books-container {
+        display: flex;
+        justify-content: center;
+        width: 600px;
+        border: 4px solid red;
+        padding: 20px;
+        background-color: lightgrey;
+      }
+
+      table {
+        margin-top: ;
+        width: 500px;
+        border-collapse: collapse;
+      }
+
+      caption {
+        margin-bottom: 10px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      th {
+        min-width: 120px;
+        background-color: lightgreen;
+        text-align: left;
+        border: 2px solid black;
+      }
+
+      td {
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <!--UI Comprising form, new book button, and book display table-->
+    <div id="ui-container">
+      <!--Form and New Book button container-->
+      <div id="form-new-book-button-container">
+        <!--Form container-->
+        <div id="form-container" style="visibility: hidden">
+          <!--Create Form-->
+          <form id="new-book-form">
+            <div id="form-elements-container">
+              <div id="caption-container">
+                <caption>
+                  New Book Form
+                </caption>
+              </div>
+              <label for="author">Author</label>
+              <input name="author" value="" data-message="an author" />
+
+              <label for="title">Title</label>
+              <input required name="title" data-message="a title" />
+
+              <label for="number-of-pages">Number of Pages</label>
+              <input
+                required
+                name="number-of-pages"
+                data-message="the number of pages"
+              />
+
+              <label for="read-not-read">Read/ Not read</label>
+              <input
+                required
+                name="read-not-read"
+                data-message="'Yes' or 'No'"
+              />
+              <div id="submit-button-container">
+                <button id="submit-button">Submit</button>
+              </div>
+            </div>
+            <!--form elements container end-->
+          </form>
+        </div>
+        <!--form container ends-->
+
+        <!--Add new book form button-->
+        <div id="new-book-button-container">
+          <button id="new-book-button">New Book</button>
+        </div>
+      </div>
+
+      <!--Display books container-->
+      <div id="display-books-container">
+        <!--Create table to display books-->
+        <div id="table-container">
+          <table>
+            <caption>
+              Library Books
+            </caption>
+
+            <tr>
+              <th>Author</th>
+              <th>Title</th>
+              <th>Number of Pages</th>
+              <th>Read/ Not Read</th>
+            </tr>
+          </table>
+        </div>
+        <!--table container ends-->
+      </div>
+    </div>
+
+    <script>
+      //Reference input, submit button, new book,
+      //form-elements-container, table tags and
+      //delete buttons
+      let inputs = document.querySelectorAll("input");
+      let submitBtn = document.querySelector("#submit-button");
+      let newBookBtn = document.querySelector("#new-book-button");
+      let formElementsContainer = document.querySelector(
+        "#form-elements-container"
+      );
+      let tableTag = document.querySelector("table");
+
+      //Store all book objects in an array of objects
+      const myLibrary = [];
+
+      //Create object construtor for book information
+      function Book(author, title, pages, read) {
+        this.author = author;
+        this.title = title;
+        this.pages = pages;
+        this.read = read;
+        this.info = function () {
+          //Return info as a string
+          return `${this.title}, ${this.author}, ${this.pages}, ${this.read}`;
+        };
+      }
+
+      //Create variables to store info from form
+      let author = "";
+      let title = "";
+      let numberOfPages = "";
+      let readNotRead = "";
+
+      //Declare/ assign variable to validate form
+      let isValid = false;
+
+      //Add event listener on input
+      inputs.forEach((input) => {
+        input.addEventListener("change", function () {
+          //As the form is iterated, the values are stored
+          //in the variables created above
+          if (input.name === "author") {
+            author = input.value;
+          }
+
+          if (input.name === "title") {
+            title = input.value;
+          }
+
+          if (input.name === "number-of-pages") {
+            numberOfPages = input.value;
+          }
+
+          if (input.name === "read-not-read") {
+            readNotRead = input.value;
+          }
+        });
+      });
+
+      //Validate form
+      //Note it is important
+      //1): Not to have a loop
+      //2): To return each object
+      function validateForm() {
+        //if author field is blank, give error
+        //message
+        if (author === "") {
+          alert("Please enter an author");
+          isValid = false;
+          console.log("Please enter an author");
+          return;
+        } else {
+          isValid = true;
+        }
+
+        //if title field is blank, give error
+        //message
+        if (title === "") {
+          alert("Please enter a title");
+          isValid = false;
+          console.log("Please enter a title");
+          return;
+        } else {
+          isValid === true;
+        }
+
+        //if number of pages field is blank or
+        //not a number give error message
+        if (numberOfPages === "" || isNaN(numberOfPages)) {
+          alert("Please enter a number.");
+          isValid = false;
+          console.log("Please enter a number.");
+          return;
+        } else {
+          isValid = true;
+        }
+
+        //if read not read field is blank, or not
+        //equal to "Yes" or "No", give error message
+        if (
+          readNotRead === "" ||
+          (readNotRead !== "Yes" && readNotRead !== "No")
+        ) {
+          alert("Please enter 'Yes' or 'No'.");
+          isValid = false;
+          console.log("Please enter 'Yes' or 'No'.");
+          return;
+        } else {
+          isValid = true;
+        }
+      }
+
+      //Add event listener on submitBtn
+      submitBtn.addEventListener("click", addBookToLibrary);
+
+      //Add event listener on new book button
+      newBookBtn.addEventListener("click", function () {
+        //Toggle 'New Book'/ 'Remove Form' button
+
+        if (newBookBtn.textContent === "New Book") {
+          //On pressing "New Book" button, the form appears
+          //and text turns to 'Remove Form'
+          formElementsContainer.style.visibility = "visible";
+          newBookBtn.textContent = "Remove Form";
+        } else if (newBookBtn.textContent === "Remove Form") {
+          //on pressing "Remove Form" button, the form disappears
+          //and text turns to 'New Book'
+          formElementsContainer.style.visibility = "hidden";
+          newBookBtn.textContent = "New Book";
+        }
+      });
+
+      //Add books using object constructor in a function
+      function addBookToLibrary(e) {
+        //Prevent the default reloading on pressing submit button
+        e.preventDefault();
+
+        validateForm();
+        //If any field is blank show error message 
+        if (isValid === false) {
+          return;
+        } else if (isValid === true) {
+          //If valid display book
+          myLibrary.push(new Book(author, title, numberOfPages, readNotRead));
+
+          console.log(myLibrary);
+
+          //Display books in a table
+
+          //Declare/ assign variables for row
+          let row = document.createElement("tr");
+          console.log(row);
+
+          //Declare/ assign variable for delete button
+          let deleteBtn = document.createElement("button");
+
+          //Set class of delele btn
+          deleteBtn.setAttribute("class", "deleteBtn");
+
+          //Set text content of deleteBtn
+          deleteBtn.textContent = "Delete";
+
+          //Set style of deleteBtn
+          deleteBtn.style.border = "2px solid red";
+          deleteBtn.style.borderRadius = "20px";
+          console.log(deleteBtn);
+
+          //Declare/ assign variables for cell data
+          let authorObj = document.createElement("td");
+          let titleObj = document.createElement("td");
+          let numberOfPagesObj = document.createElement("td");
+          let readNotReadObj = document.createElement("td");
+
+          //Populate cells dynamically for each data
+          //in myLibrary object
+          for (let books of myLibrary) {
+            authorObj.textContent = books.author;
+            titleObj.textContent = books.title;
+            numberOfPagesObj.textContent = books.pages;
+            readNotReadObj.textContent = books.read;
+
+            //Declare/assign id and property for row and
+            //delete btn to access individual rows
+            //for deletion
+            row.setAttribute("id", myLibrary.indexOf(books));
+            deleteBtn.setAttribute("data-id", myLibrary.indexOf(books));
+            //console.log(row.id);
+            // console.log(deleteBtn.id);
+
+            //Declare/ assign id and class property
+            //to readNotReadObj
+            readNotReadObj.setAttribute("id", myLibrary.indexOf(books));
+            readNotReadObj.setAttribute("class", "yesNo");
+            console.log(readNotReadObj);
+          }
+
+          //Append data from myLibrary obj to dynamically
+          //created row, and append delete button
+          row.appendChild(authorObj);
+          row.appendChild(titleObj);
+          row.appendChild(numberOfPagesObj);
+          row.appendChild(readNotReadObj);
+          row.appendChild(deleteBtn);
+
+          //Append dynamically created row to table that
+          //was created manually
+          tableTag.appendChild(row);
+
+          //Clear form when submit button is pressed by:
+          //Looping through each input tag and set value
+          //to empty string
+          //And setting each variable to empty string
+          inputs.forEach((input) => {
+            input.value = "";
+          });
+          author = "";
+          title = "";
+          numberOfPages = "";
+          readNotRead = "";
+
+          //Reference delete buttons
+          let deleteBtns = document.querySelectorAll(".deleteBtn");
+
+          //Update delete buttons when pressed
+          function deleteBtnUpdate(e) {
+            //Check to see which delete btn is pressed
+            if (this.dataset.id === row.id) {
+              //Remove row
+              document.getElementById(row.id).remove();
+            }
+          }
+          //Add event listener to delete buttons
+          deleteBtns.forEach((btn) => {
+            btn.addEventListener("click", deleteBtnUpdate);
+          });
+
+          //Reference readNotReadObj to toggle "Yes/No"
+          let yesNos = document.querySelectorAll(".yesNo");
+
+          //Update yesNo when pressed
+          function updateYesNo(e) {
+            console.log("yesNo pressed");
+            if (this.id === row.id) {
+              if (readNotReadObj.textContent === "Yes") {
+                readNotReadObj.textContent = "No";
+              } else if (readNotReadObj.textContent === "No") {
+                readNotReadObj.textContent = "Yes";
+              } else {
+                //Default "Yes" if column is empty
+                readNotReadObj.textContent = "Yes";
+              }
+            }
+          }
+
+          //Add event listener to yesNo
+          yesNos.forEach((yesNo) => {
+            yesNo.addEventListener("click", updateYesNo);
+          });
+        } //Display form code ends here
+      }
+    </script>
+  </body>
+</html>
